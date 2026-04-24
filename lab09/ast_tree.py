@@ -29,19 +29,13 @@ class Token:
 
 @dataclass
 class AST:
-    """Nod din arborele sintactic abstract.
-
-    Un nod poate fi:
-    - Operator (nod intern cu copii stânga și dreapta)
-    - Operand / Frunză (nod terminal cu valoare numerică)
-    """
+    """Nod din arborele sintactic abstract."""
 
     token: Token
     stanga: Optional["AST"] = field(default=None)
     dreapta: Optional["AST"] = field(default=None)
 
     def este_frunza(self) -> bool:
-        """Returnează True dacă nodul este o frunză (operand)."""
         return self.stanga is None and self.dreapta is None
 
 
@@ -51,35 +45,32 @@ Operand = AST
 
 
 class ASTBuilder:
-    """Construiește un AST dintr-o expresie aritmetică.
+    """Construiește un AST dintr-o expresie aritmetică."""
 
-    Respectă prioritatea operatorilor:
-    - * și / au prioritate față de + și -
-    - Evaluare de la stânga la dreapta pentru operatori de aceeași prioritate
-
-    Presupuneri:
-    - Expresia nu conține spații
-    - Operanzii sunt numere întregi non-negative
-    - Expresia este validă sintactic
-    """
-
-    # TODO: Implementează metoda Parse
     def Parse(self, expresie: str) -> AST:
-        """Parsează o expresie aritmetică și returnează AST-ul corespunzător.
+        # 1. Căutăm operatori de prioritate mică (+ și -)
+        for i in range(len(expresie) - 1, -1, -1):
+            if expresie[i] in "+-":
+                stanga = expresie[:i]
+                dreapta = expresie[i + 1:]
 
-        Exemplu:
-            builder = ASTBuilder()
-            ast = builder.Parse("3+5")
-            # Returnează un nod AST cu token '+', stânga=3, dreapta=5
+                return AST(
+                    Token(expresie[i]),
+                    self.Parse(stanga),
+                    self.Parse(dreapta)
+                )
 
-        Args:
-            expresie: Expresia de parsare (ex: "3+5*2", "10-3+1").
+        # 2. Dacă nu găsim, căutăm operatori de prioritate mare (* și /)
+        for i in range(len(expresie) - 1, -1, -1):
+            if expresie[i] in "*/":
+                stanga = expresie[:i]
+                dreapta = expresie[i + 1:]
 
-        Returns:
-            Rădăcina arborelui AST.
+                return AST(
+                    Token(expresie[i]),
+                    self.Parse(stanga),
+                    self.Parse(dreapta)
+                )
 
-        Hint:
-            Parsează mai întâi + și -, apoi * și /.
-            Folosește o abordare iterativă cu stivă sau recursivă.
-        """
-        raise NotImplementedError("De implementat")
+        # 3. Caz de bază: este un număr (frunză)
+        return AST(Token(expresie))
