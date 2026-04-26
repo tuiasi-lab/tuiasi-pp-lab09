@@ -63,23 +63,106 @@ class ASTBuilder:
     - Expresia este validă sintactic
     """
 
-    # TODO: Implementează metoda Parse
     def Parse(self, expresie: str) -> AST:
         """Parsează o expresie aritmetică și returnează AST-ul corespunzător.
 
-        Exemplu:
-            builder = ASTBuilder()
-            ast = builder.Parse("3+5")
-            # Returnează un nod AST cu token '+', stânga=3, dreapta=5
+        Folosește o abordare iterativă în două treceri:
+        1. Tokenizare
+        2. Construire AST respectând prioritatea operatorilor
 
         Args:
             expresie: Expresia de parsare (ex: "3+5*2", "10-3+1").
 
         Returns:
             Rădăcina arborelui AST.
-
-        Hint:
-            Parsează mai întâi + și -, apoi * și /.
-            Folosește o abordare iterativă cu stivă sau recursivă.
         """
-        raise NotImplementedError("De implementat")
+        tokens = self._tokenizeaza(expresie)
+        return self._parse_expresie(tokens, 0)[0]
+
+    def _tokenizeaza(self, expresie: str) -> list[Token]:
+        """Transformă expresia în listă de token-uri.
+
+        Args:
+            expresie: Expresia de tokenizat.
+
+        Returns:
+            Lista de token-uri.
+        """
+        tokens = []
+        i = 0
+        while i < len(expresie):
+            if expresie[i] in {"+", "-", "*", "/"}:
+                tokens.append(Token(expresie[i]))
+                i += 1
+            elif expresie[i].isdigit():
+                j = i
+                while j < len(expresie) and expresie[j].isdigit():
+                    j += 1
+                tokens.append(Token(expresie[i:j]))
+                i = j
+            else:
+                i += 1
+        return tokens
+
+    def _parse_expresie(self, tokens: list[Token], pos: int) -> tuple[AST, int]:
+        """Parsează o expresie (sumă/diferență de termeni).
+
+        expresie := termen (('+' | '-') termen)*
+
+        Args:
+            tokens: Lista de token-uri.
+            pos: Poziția curentă în lista de token-uri.
+
+        Returns:
+            Tuplu (nod AST, poziție după parsare).
+        """
+        # Parsăm primul termen
+        stanga, pos = self._parse_termen(tokens, pos)
+
+        # Continuăm cât timp urmează + sau -
+        while pos < len(tokens) and tokens[pos].valoare in {"+", "-"}:
+            operator = tokens[pos]
+            pos += 1
+            dreapta, pos = self._parse_termen(tokens, pos)
+            stanga = AST(token=operator, stanga=stanga, dreapta=dreapta)
+
+        return stanga, pos
+
+    def _parse_termen(self, tokens: list[Token], pos: int) -> tuple[AST, int]:
+        """Parsează un termen (produs/câit de factori).
+
+        termen := factor (('*' | '/') factor)*
+
+        Args:
+            tokens: Lista de token-uri.
+            pos: Poziția curentă în lista de token-uri.
+
+        Returns:
+            Tuplu (nod AST, poziție după parsare).
+        """
+        # Parsăm primul factor
+        stanga, pos = self._parse_factor(tokens, pos)
+
+        # Continuăm cât timp urmează * sau /
+        while pos < len(tokens) and tokens[pos].valoare in {"*", "/"}:
+            operator = tokens[pos]
+            pos += 1
+            dreapta, pos = self._parse_factor(tokens, pos)
+            stanga = AST(token=operator, stanga=stanga, dreapta=dreapta)
+
+        return stanga, pos
+
+    def _parse_factor(self, tokens: list[Token], pos: int) -> tuple[AST, int]:
+        """Parsează un factor (număr întreg).
+
+        factor := NUMAR
+
+        Args:
+            tokens: Lista de token-uri.
+            pos: Poziția curentă în lista de token-uri.
+
+        Returns:
+            Tuplu (nod AST frunză, poziție după parsare).
+        """
+        token = tokens[pos]
+        return AST(token=token), pos + 1
