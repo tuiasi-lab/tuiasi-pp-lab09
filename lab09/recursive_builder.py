@@ -15,8 +15,6 @@ class RecursiveASTBuilder:
         expresie  := termen (('+' | '-') termen)*
         termen    := factor (('*' | '/') factor)*
         factor    := NUMAR
-
-    Această gramatică respectă automat prioritatea operatorilor.
     """
 
     def __init__(self) -> None:
@@ -24,11 +22,8 @@ class RecursiveASTBuilder:
         self._expresie: str = ""
         self._pozitie: int = 0
 
-    # TODO: Implementează metoda Parse
     def Parse(self, expresie: str) -> AST:
         """Parsează o expresie aritmetică recursiv.
-
-        Produce același AST ca ASTBuilder pentru expresii echivalente.
 
         Args:
             expresie: Expresia de parsare (ex: "3+5-2").
@@ -36,41 +31,53 @@ class RecursiveASTBuilder:
         Returns:
             Rădăcina arborelui AST.
         """
-        raise NotImplementedError("De implementat")
+        self._expresie = expresie
+        self._pozitie = 0
+        return self._parse_expresie()
 
     def _parse_expresie(self) -> AST:
         """Parsează o expresie (sumă/diferență de termeni).
 
-        Returns:
-            Nod AST pentru expresia curentă.
+        expresie := termen (('+' | '-') termen)*
         """
-        # TODO: Parsează primul termen, apoi operatorii + și -
-        raise NotImplementedError("De implementat")
+        stanga = self._parse_termen()
+
+        while self._caracter_curent() in {"+", "-"}:
+            op = self._caracter_curent()
+            self._pozitie += 1
+            dreapta = self._parse_termen()
+            stanga = AST(token=Token(op), stanga=stanga, dreapta=dreapta)
+
+        return stanga
 
     def _parse_termen(self) -> AST:
         """Parsează un termen (produs/câit de factori).
 
-        Returns:
-            Nod AST pentru termenul curent.
+        termen := factor (('*' | '/') factor)*
         """
-        # TODO: Parsează primul factor, apoi operatorii * și /
-        raise NotImplementedError("De implementat")
+        stanga = self._parse_factor()
+
+        while self._caracter_curent() in {"*", "/"}:
+            op = self._caracter_curent()
+            self._pozitie += 1
+            dreapta = self._parse_factor()
+            stanga = AST(token=Token(op), stanga=stanga, dreapta=dreapta)
+
+        return stanga
 
     def _parse_factor(self) -> AST:
         """Parsează un factor (număr întreg).
 
-        Returns:
-            Nod AST frunză cu valoarea numerică.
+        factor := NUMAR
         """
-        # TODO: Citește caracterele numerice și creează un nod frunză
-        raise NotImplementedError("De implementat")
+        start = self._pozitie
+        while self._caracter_curent() is not None and self._caracter_curent().isdigit():
+            self._pozitie += 1
+        numar = self._expresie[start:self._pozitie]
+        return AST(token=Token(numar))
 
     def _caracter_curent(self) -> str | None:
-        """Returnează caracterul curent din expresie sau None la sfârșit.
-
-        Returns:
-            Caracterul curent sau None.
-        """
+        """Returnează caracterul curent din expresie sau None la sfârșit."""
         if self._pozitie < len(self._expresie):
             return self._expresie[self._pozitie]
         return None
