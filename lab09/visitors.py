@@ -19,30 +19,15 @@ class PrintVisitor(ABC):
 
     @abstractmethod
     def viziteaza(self, nod: AST) -> None:
-        """Vizitează un nod AST (implementat în subclase).
-
-        Args:
-            nod: Nodul de vizitat.
-        """
+        """Vizitează un nod AST (implementat în subclase)."""
         ...
 
     def get_rezultat(self) -> list[str | int]:
-        """Returnează lista token-urilor colectate.
-
-        Returns:
-            Lista de token-uri în ordinea parcurgerii.
-        """
+        """Returnează lista token-urilor colectate."""
         return list(self.rezultat)
 
     def _valoare_nod(self, nod: AST) -> str | int:
-        """Returnează valoarea unui nod: număr întreg sau operator string.
-
-        Args:
-            nod: Nodul din care se extrage valoarea.
-
-        Returns:
-            Int dacă nod este operand, str dacă este operator.
-        """
+        """Returnează valoarea unui nod: număr întreg sau operator string."""
         if nod.token.este_operand():
             return int(nod.token.valoare)
         return nod.token.valoare
@@ -52,11 +37,6 @@ class VisitPreOrdine(PrintVisitor):
     """Parcurgere pre-ordine: Rădăcină → Stânga → Dreapta."""
 
     def viziteaza(self, nod: AST) -> None:
-        """Parcurge AST-ul în pre-ordine și colectează token-urile.
-
-        Args:
-            nod: Rădăcina sub-arborelui de vizitat.
-        """
         # Dat ca exemplu — nu modifica
         self.rezultat.append(self._valoare_nod(nod))
         if nod.stanga:
@@ -68,43 +48,38 @@ class VisitPreOrdine(PrintVisitor):
 class VisitInOrdine(PrintVisitor):
     """Parcurgere in-ordine: Stânga → Rădăcină → Dreapta."""
 
-    # TODO: Implementează metoda viziteaza
     def viziteaza(self, nod: AST) -> None:
         """Parcurge AST-ul în in-ordine și colectează token-urile.
-
-        Ordinea: vizitează stânga, apoi rădăcina, apoi dreapta.
-
-        Args:
-            nod: Rădăcina sub-arborelui de vizitat.
 
         Exemplu pentru "3+5":
             rezultat = [3, '+', 5]
         """
-        raise NotImplementedError("De implementat")
+        if nod.stanga:
+            self.viziteaza(nod.stanga)
+        self.rezultat.append(self._valoare_nod(nod))
+        if nod.dreapta:
+            self.viziteaza(nod.dreapta)
 
 
 class VisitPostOrdine(PrintVisitor):
     """Parcurgere post-ordine: Stânga → Dreapta → Rădăcină."""
 
-    # TODO: Implementează metoda viziteaza
     def viziteaza(self, nod: AST) -> None:
         """Parcurge AST-ul în post-ordine și colectează token-urile.
-
-        Ordinea: vizitează stânga, apoi dreapta, apoi rădăcina.
-
-        Args:
-            nod: Rădăcina sub-arborelui de vizitat.
 
         Exemplu pentru "3+5":
             rezultat = [3, 5, '+']
         """
-        raise NotImplementedError("De implementat")
+        if nod.stanga:
+            self.viziteaza(nod.stanga)
+        if nod.dreapta:
+            self.viziteaza(nod.dreapta)
+        self.rezultat.append(self._valoare_nod(nod))
 
 
 class EvaluatorVisitor:
     """Vizitator care evaluează numeric expresia din AST."""
 
-    # TODO: Implementează metoda evalueaza
     def evalueaza(self, nod: AST) -> int | float:
         """Evaluează recursiv expresia reprezentată de AST.
 
@@ -115,12 +90,26 @@ class EvaluatorVisitor:
             Valoarea numerică a expresiei.
 
         Raises:
-            ValueError: La împărțire prin zero.
             ZeroDivisionError: La împărțire prin zero.
-
-        Exemplu:
-            ast = ASTBuilder().Parse("3+5")
-            evaluator = EvaluatorVisitor()
-            assert evaluator.evalueaza(ast) == 8
         """
-        raise NotImplementedError("De implementat")
+        # Frunză → returnează valoarea numerică
+        if nod.este_frunza():
+            return int(nod.token.valoare)
+
+        # Nod intern → evaluează recursiv copiii
+        val_stanga = self.evalueaza(nod.stanga)
+        val_dreapta = self.evalueaza(nod.dreapta)
+
+        op = nod.token.valoare
+        if op == "+":
+            return val_stanga + val_dreapta
+        elif op == "-":
+            return val_stanga - val_dreapta
+        elif op == "*":
+            return val_stanga * val_dreapta
+        elif op == "/":
+            if val_dreapta == 0:
+                raise ZeroDivisionError("Împărțire prin zero")
+            return val_stanga / val_dreapta
+        else:
+            raise ValueError(f"Operator necunoscut: {op}")
