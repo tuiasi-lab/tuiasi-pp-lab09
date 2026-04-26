@@ -12,7 +12,6 @@ from typing import Optional
 class Log:
     """Singleton pentru jurnalizarea mesajelor cu timestamp."""
 
-    # TODO: Adaugă atribut de clasă pentru instanța singleton
     _instanta: Optional["Log"] = None
 
     def __init__(self) -> None:
@@ -22,7 +21,6 @@ class Log:
         """
         self._mesaje: list[str] = []
 
-    # TODO: Implementează metoda de clasă get_instance
     @classmethod
     def get_instance(cls) -> "Log":
         """Returnează instanța singleton a clasei Log.
@@ -33,16 +31,18 @@ class Log:
         Returns:
             Singura instanță a clasei Log.
         """
-        raise NotImplementedError("De implementat")
+        if cls._instanta is None:
+            cls._instanta = cls()
+        return cls._instanta
 
-    # TODO: Implementează metoda log
     def log(self, mesaj: str) -> None:
         """Înregistrează un mesaj cu timestamp curent.
 
         Args:
             mesaj: Mesajul de înregistrat.
         """
-        raise NotImplementedError("De implementat")
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        self._mesaje.append(f"[{timestamp}] {mesaj}")
 
     def get_mesaje(self) -> list[str]:
         """Returnează lista tuturor mesajelor înregistrate.
