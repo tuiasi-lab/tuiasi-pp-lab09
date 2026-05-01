@@ -5,6 +5,8 @@ Construiește AST-ul printr-o funcție recursivă de descent
 în loc de abordarea iterativă cu stivă.
 """
 
+from ast import operator
+
 from lab09.ast_tree import AST, Token
 
 
@@ -52,8 +54,7 @@ class RecursiveASTBuilder:
             operator = self._caracter_curent()
             self._pozitie += 1
             dreapta = self._parse_termen()
-            nod = AST(Token(operator), nod, dreapta)
-            
+            nod = AST(token=Token(operator), stanga=nod, dreapta=dreapta)            
         return nod
         # TODO: Parsează primul termen, apoi operatorii + și -
 
@@ -69,8 +70,11 @@ class RecursiveASTBuilder:
             operator = self._caracter_curent()
             self._pozitie += 1
             dreapta = self._parse_factor()
-            nod = AST(Token(operator), nod, dreapta)
-        # TODO: Parsează primul factor, apoi operatorii * și /
+            # La fel si aici pentru inmultire si impartire:
+            nod = AST(token=Token(operator), stanga=nod, dreapta=dreapta)
+            
+        return nod                   
+    # TODO: Parsează primul factor, apoi operatorii * și /
 
     def _parse_factor(self) -> AST:
         """Parsează un factor (număr întreg).
