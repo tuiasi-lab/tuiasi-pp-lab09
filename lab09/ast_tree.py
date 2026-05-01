@@ -82,4 +82,23 @@ class ASTBuilder:
             Parsează mai întâi + și -, apoi * și /.
             Folosește o abordare iterativă cu stivă sau recursivă.
         """
-        raise NotImplementedError("De implementat")
+        if not expresie:
+            return None
+
+        # Cautam ultimul + sau - (pentru a respecta asociativitatea la stanga)
+        for i in range(len(expresie) - 1, -1, -1):
+            if expresie[i] in {"+", "-"}:
+                stanga = self.Parse(expresie[:i])
+                dreapta = self.Parse(expresie[i+1:])
+                return AST(Token(expresie[i]), stanga, dreapta)
+
+        # Cautam ultimul * sau /
+        for i in range(len(expresie) - 1, -1, -1):
+            if expresie[i] in {"*", "/"}:
+                stanga = self.Parse(expresie[:i])
+                dreapta = self.Parse(expresie[i+1:])
+                return AST(Token(expresie[i]), stanga, dreapta)
+
+        # Daca nu am gasit operatori, este o frunza (numar)
+        return AST(Token(expresie))
+        

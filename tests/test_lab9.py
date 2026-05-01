@@ -10,15 +10,15 @@ Testele acoperă:
 
 import pytest
 
-from lab9.ast_tree import ASTBuilder
-from lab9.visitors import (
+from lab09.ast_tree import ASTBuilder
+from lab09.visitors import (
     VisitPreOrdine,
     VisitInOrdine,
     VisitPostOrdine,
     EvaluatorVisitor,
 )
-from lab9.log import Log
-from lab9.recursive_builder import RecursiveASTBuilder
+from lab09.log import Log
+from lab09.recursive_builder import RecursiveASTBuilder
 
 
 class TestVisitors:
