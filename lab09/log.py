@@ -33,7 +33,10 @@ class Log:
         Returns:
             Singura instanță a clasei Log.
         """
-        raise NotImplementedError("De implementat")
+        if cls._instanta is None:
+            cls._instanta = cls()
+        return cls._instanta
+        
 
     # TODO: Implementează metoda log
     def log(self, mesaj: str) -> None:
@@ -42,7 +45,8 @@ class Log:
         Args:
             mesaj: Mesajul de înregistrat.
         """
-        raise NotImplementedError("De implementat")
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        self._mesaje.append(f"[{timestamp}] {mesaj}")
 
     def get_mesaje(self) -> list[str]:
         """Returnează lista tuturor mesajelor înregistrate.

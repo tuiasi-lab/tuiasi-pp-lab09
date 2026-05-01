@@ -7,7 +7,7 @@ Separă algoritmii (parcurgere, evaluare) de structura datelor (AST).
 
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from lab9.ast_tree import AST
+from lab09.ast_tree import AST
 
 
 class PrintVisitor(ABC):
@@ -24,7 +24,7 @@ class PrintVisitor(ABC):
         Args:
             nod: Nodul de vizitat.
         """
-        ...
+        
 
     def get_rezultat(self) -> list[str | int]:
         """Returnează lista token-urilor colectate.
@@ -80,7 +80,13 @@ class VisitInOrdine(PrintVisitor):
         Exemplu pentru "3+5":
             rezultat = [3, '+', 5]
         """
-        raise NotImplementedError("De implementat")
+        if nod.stanga:
+            self.viziteaza(nod.stanga)
+            
+        self.rezultat.append(self._valoare_nod(nod))
+        
+        if nod.dreapta:
+            self.viziteaza(nod.dreapta)
 
 
 class VisitPostOrdine(PrintVisitor):
@@ -98,7 +104,13 @@ class VisitPostOrdine(PrintVisitor):
         Exemplu pentru "3+5":
             rezultat = [3, 5, '+']
         """
-        raise NotImplementedError("De implementat")
+        if nod.stanga:
+            self.viziteaza(nod.stanga)
+            
+        if nod.dreapta:
+            self.viziteaza(nod.dreapta)
+            
+        self.rezultat.append(self._valoare_nod(nod))
 
 
 class EvaluatorVisitor:
@@ -123,4 +135,22 @@ class EvaluatorVisitor:
             evaluator = EvaluatorVisitor()
             assert evaluator.evalueaza(ast) == 8
         """
-        raise NotImplementedError("De implementat")
+        if nod.este_frunza():
+            return int(nod.token.valoare)
+
+        stanga = self.evalueaza(nod.stanga)
+        dreapta = self.evalueaza(nod.dreapta)
+        operator = nod.token.valoare
+
+        if operator == "+":
+            return stanga + dreapta
+        elif operator == "-":
+            return stanga - dreapta
+        elif operator == "*":
+            return stanga * dreapta
+        elif operator == "/":
+            if dreapta == 0:
+                raise ZeroDivisionError("Impartire prin zero")
+            return stanga / dreapta
+            
+        raise ValueError(f"Operator necunoscut: {operator}")
