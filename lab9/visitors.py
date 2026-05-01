@@ -7,7 +7,7 @@ Separă algoritmii (parcurgere, evaluare) de structura datelor (AST).
 
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from lab09.ast_tree import AST
+from lab9.ast_tree import AST
 
 
 class PrintVisitor(ABC):

@@ -5,10 +5,10 @@ Utilizare:
     uv run python -m lab9.main
 """
 
-from lab09.ast_tree import ASTBuilder
-from lab09.visitors import VisitPreOrdine, VisitInOrdine, VisitPostOrdine, EvaluatorVisitor
-from lab09.recursive_builder import RecursiveASTBuilder
-from lab09.log import Log
+from lab9.ast_tree import ASTBuilder
+from lab9.visitors import VisitPreOrdine, VisitInOrdine, VisitPostOrdine, EvaluatorVisitor
+from lab9.recursive_builder import RecursiveASTBuilder
+from lab9.log import Log
 
 
 def main() -> None:

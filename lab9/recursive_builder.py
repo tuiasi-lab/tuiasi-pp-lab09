@@ -5,7 +5,7 @@ Construiește AST-ul printr-o funcție recursivă de descent
 în loc de abordarea iterativă cu stivă.
 """
 
-from lab09.ast_tree import AST, Token
+from lab9.ast_tree import AST, Token
 
 
 class RecursiveASTBuilder:
